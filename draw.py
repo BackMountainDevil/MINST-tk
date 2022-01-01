@@ -14,9 +14,6 @@ class ImageGenerator:
         self.posy = posy
         self.sizex = 280
         self.sizey = 280
-        self.b1 = "up"
-        self.xold = None
-        self.yold = None
         self.penColor = "white"  # 画笔的颜色 (255, 255, 255)
         self.backColor = "black"  # 画布背景色 (0, 0, 0)
         self.penWidth = 10  # 笔刷的宽度
@@ -24,9 +21,7 @@ class ImageGenerator:
             self.parent, width=self.sizex, height=self.sizey, bg=self.backColor
         )
         self.drawing_area.place(x=self.posx, y=self.posy)
-        self.drawing_area.bind("<Motion>", self.motion)
-        self.drawing_area.bind("<ButtonPress-1>", self.b1down)
-        self.drawing_area.bind("<ButtonRelease-1>", self.b1up)
+        self.drawing_area.bind("<B1-Motion>", self.motion)
         self.button = tk.Button(
             self.parent, text="Done", width=10, bg="white", command=self.save
         )
@@ -49,38 +44,26 @@ class ImageGenerator:
         self.image = Image.new("RGB", (self.sizex, self.sizey), (0, 0, 0))
         self.draw = ImageDraw.Draw(self.image)
 
-    def b1down(self, event):
-        self.b1 = "down"
-
-    def b1up(self, event):
-        self.b1 = "up"
-        self.xold = None
-        self.yold = None
-
     def motion(self, event):
         """在画板和image上同时绘制"""
-        if self.b1 == "down":
-            if self.xold is not None and self.yold is not None:
-                event.widget.create_oval(
-                    self.xold,
-                    self.yold,
-                    event.x + self.penWidth,
-                    event.y + self.penWidth,
-                    fill=self.penColor,
-                    outline=self.penColor,
-                )  # 在画布上画
+        self.drawing_area.create_oval(
+            event.x,
+            event.y,
+            event.x + self.penWidth,
+            event.y + self.penWidth,
+            fill=self.penColor,
+            outline=self.penColor,
+        )  # 在画布上画
 
-                self.draw.ellipse(
-                    (
-                        (self.xold, self.yold),
-                        (event.x + self.penWidth, event.y + self.penWidth),
-                    ),
-                    fill=self.penColor,
-                    outline=self.penColor,
-                    width=self.penWidth,
-                )  # 在生成的图上画,point、line都太细
-        self.xold = event.x
-        self.yold = event.y
+        self.draw.ellipse(
+            (
+                (event.x, event.y),
+                (event.x + self.penWidth, event.y + self.penWidth),
+            ),
+            fill=self.penColor,
+            outline=self.penColor,
+            width=self.penWidth,
+        )  # 在生成的图上画,point、line都太细
 
 
 if __name__ == "__main__":
