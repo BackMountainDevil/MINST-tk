@@ -38,20 +38,23 @@ def load_image(file):
     return im
 
 
-infer_path = "work/8.png"
-img = Image.open(infer_path)
+def predictImage(filepath="temp.jpg"):
+    # 构建预测动态图过程
+    label_list = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+    model_path = "work/model"  # 模型路径
+    with fluid.dygraph.guard():
+        model = multilayer_perceptron()  # 模型实例化
+        model_dict, _ = fluid.load_dygraph(model_path)
+        model.load_dict(model_dict)  # 加载模型参数
+        model.eval()  # 评估模式
+        infer_img = load_image(filepath)
+        infer_img = np.array(infer_img).astype("float32")
+        infer_img = infer_img[np.newaxis, :, :, :]
+        infer_img = fluid.dygraph.to_variable(infer_img)
+        result = model(infer_img)
+        # print("infer results: %s" % label_list[np.argmax(result.numpy())])
+    return label_list[np.argmax(result.numpy())]
 
-# 构建预测动态图过程
-label_list = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
-model_path = "work/model"  # 模型路径
-with fluid.dygraph.guard():
-    model = multilayer_perceptron()  # 模型实例化
-    model_dict, _ = fluid.load_dygraph(model_path)
-    model.load_dict(model_dict)  # 加载模型参数
-    model.eval()  # 评估模式
-    infer_img = load_image(infer_path)
-    infer_img = np.array(infer_img).astype("float32")
-    infer_img = infer_img[np.newaxis, :, :, :]
-    infer_img = fluid.dygraph.to_variable(infer_img)
-    result = model(infer_img)
-    print("infer results: %s" % label_list[np.argmax(result.numpy())])
+
+if __name__ == "__main__":
+    print(predictImage())

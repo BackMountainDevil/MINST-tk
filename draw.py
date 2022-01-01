@@ -5,6 +5,7 @@ https://stackoverflow.com/questions/17915440/python-tkinter-save-canvas-as-image
 """
 import tkinter as tk
 from PIL import Image, ImageDraw
+from recognize import predictImage
 
 
 class ImageGenerator:
@@ -31,18 +32,23 @@ class ImageGenerator:
         )
         self.button1.place(x=(self.sizex / 7) + 80, y=self.sizey + 20)
 
+        self.labEval = tk.Label(self.parent, text="Eval", bg="white", width=10)  # 显示预测值
+        self.labEval.place(x=(self.sizex / 7) + 170, y=self.sizey + 25)
+
         self.image = Image.new("RGB", (self.sizex, self.sizey), (0, 0, 0))
         self.draw = ImageDraw.Draw(self.image)
 
-    def save(self):
-        filename = "temp.jpg"
+    def save(self, filename="temp.jpg"):
+        """暂存图片，并将预测结果显示在 label 上"""
         self.image.save(filename)
+        self.labEval.configure(text=predictImage(filename))
 
     def clear(self):
         """将画板和image清空"""
         self.drawing_area.delete("all")
         self.image = Image.new("RGB", (self.sizex, self.sizey), (0, 0, 0))
         self.draw = ImageDraw.Draw(self.image)
+        self.labEval.configure(text="Eval")  # 重置预测值
 
     def motion(self, event):
         """在画板和image上同时绘制"""
